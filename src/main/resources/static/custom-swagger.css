@@ -1,12 +1,8 @@
 .swagger-ui .wrapper {
-    max-width: 90%;
+    max-width: 50%;
     margin: auto;
 }
 
 .swagger-ui .information-container.wrapper {
-    max-width: 90%;
-}
-
-body {
-    zoom: 1.2;
+    max-width: 50%;
 }

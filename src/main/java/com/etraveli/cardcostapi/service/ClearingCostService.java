@@ -1,5 +1,6 @@
 package com.etraveli.cardcostapi.service;
 
+import com.etraveli.cardcostapi.dto.BinlistResponse;
 import com.etraveli.cardcostapi.entity.ClearingCost;
 import com.etraveli.cardcostapi.exception.ResourceNotFoundException;
 import com.etraveli.cardcostapi.repository.ClearingCostRepository;
@@ -76,22 +77,35 @@ public class ClearingCostService implements IClearingCostService {
 
     /**
      * Calcula el costo de clearing basado en el BIN (primeros dígitos de la tarjeta).
-     *
      * @param cardNumber El número de la tarjeta para determinar el país emisor.
-     * @return El costo de clearing calculado.
+     * @return El costo calculado.
      */
+    @Override
     public BigDecimal calculateClearingCost(String cardNumber) {
+        // Validar el PAN antes de proceder
+        if (!isPanValid(cardNumber)) {
+            throw new IllegalArgumentException("Número de tarjeta inválido");
+        }
 
-        String countryCode = binlistService.getCountryCodeByCardNumber(cardNumber);
+        String countryCode = getCountryCodeFromCardNumber(cardNumber).getCountry().getAlpha2();
         ClearingCost clearingCost = clearingCostRepository.findByCountryCode(countryCode)
                 .orElseGet(() -> getDefaultClearingCost(countryCode));
-
         return clearingCost.getCost();
     }
 
     /**
-     * Proporciona un costo predeterminado para los países no especificados (OTHERS).
+     * Obtiene el código del país emisor de la tarjeta usando Binlist.
      *
+     * @param cardNumber El número de tarjeta.
+     * @return El código del país de emisión.
+     */
+    @Override
+    public BinlistResponse getCountryCodeFromCardNumber(String cardNumber) {
+        return binlistService.getCountryCodeByCardNumber(cardNumber);
+    }
+
+    /**
+     * Proporciona un costo predeterminado para los países no especificados (OTHERS).
      * @param countryCode Código del país para el cual se requiere determinar el costo.
      * @return 'ClearingCost' con el costo predeterminado.
      */
@@ -101,4 +115,50 @@ public class ClearingCostService implements IClearingCostService {
         defaultCost.setCost(new BigDecimal("10.00"));
         return defaultCost;
     }
+
+    /**
+     * Valida si el PAN cumple con el formato correcto y pasa la validación de Luhn.
+     * @param pan El número de tarjeta (PAN).
+     * @return Verdadero si el PAN es válido, falso de lo contrario.
+     */
+    @Override
+    public boolean isPanValid(String pan) {
+        return isValidPanFormat(pan) && isValidLuhn(pan);
+    }
+
+    /**
+     * Valida el formato del PAN (solo dígitos y longitud entre 8 y 19).
+     * @param pan El número de tarjeta.
+     * @return Verdadero si el formato es válido, falso de lo contrario.
+     */
+    public boolean isValidPanFormat(String pan) {
+        if (pan == null || pan.length() < 8 || pan.length() > 19) {
+            return false;
+        }
+        return pan.matches("\\d+");
+    }
+
+    /**
+     * Algoritmo de Luhn para validar el PAN.
+     * @param pan El número de tarjeta.
+     * @return Verdadero si el PAN es válido según Luhn, falso de lo contrario.
+     */
+    public boolean isValidLuhn(String pan) {
+        int nDigits = pan.length();
+        int sum = 0;
+        boolean isSecond = false;
+
+        // Iterar de derecha a izquierda
+        for (int i = nDigits - 1; i >= 0; i--) {
+            int d = pan.charAt(i) - '0';
+            if (isSecond) {
+                d = d * 2;
+            }
+            // Si el resultado de la multiplicación es mayor a 9, restamos 9
+            sum += d > 9 ? d - 9 : d;
+            isSecond = !isSecond;
+        }
+        return (sum % 10 == 0);
+    }
+
 }

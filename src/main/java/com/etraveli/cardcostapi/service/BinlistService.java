@@ -10,10 +10,10 @@ public class BinlistService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public String getCountryCodeByCardNumber(String cardNumber) {
+    public BinlistResponse getCountryCodeByCardNumber(String cardNumber) {
         String url = "https://lookup.binlist.net/" + cardNumber;
         ResponseEntity<BinlistResponse> response = restTemplate.getForEntity(url, BinlistResponse.class);
-        return response.getBody().getCountry().getAlpha2();
+        return response.getBody();
     }
 }
 

@@ -1,5 +1,6 @@
 package com.etraveli.cardcostapi.controller;
 
+import com.etraveli.cardcostapi.dto.BinlistResponse;
 import com.etraveli.cardcostapi.entity.ClearingCost;
 import com.etraveli.cardcostapi.service.IClearingCostService;
 import jakarta.validation.Valid;
@@ -45,14 +46,24 @@ public class ClearingCostController {
     }
 
     /**
-     * Endpoint para calcular el costo de clearing basado en el número de tarjeta.
-     *
+     * Endpoint para calcular el costo basado en el número de tarjeta (PAN).
      * @param cardNumber El número de la tarjeta.
-     * @return El costo de clearing calculado.
+     * @return Una respuesta con el costo  calculado o un error 400 si el PAN no es válido.
      */
-    @GetMapping("/calculate")
-    public ResponseEntity<BigDecimal> calculateClearingCost(@RequestParam String cardNumber) {
-        BigDecimal cost = clearingCostService.calculateClearingCost(cardNumber);
-        return new ResponseEntity<>(cost, HttpStatus.OK);
+    @GetMapping("/payment-cards-cost")
+    public ResponseEntity<Object> calculateClearingCost(@RequestParam String cardNumber) {
+        try {
+            // Validar el PAN antes de proceder
+            if (!clearingCostService.isPanValid(cardNumber)) {
+                return ResponseEntity.badRequest().body("Número de tarjeta inválido. Verifique el formato y longitud.");
+            }
+            BinlistResponse binlistResponse = clearingCostService.getCountryCodeFromCardNumber(cardNumber);
+            BigDecimal cost = clearingCostService.calculateClearingCost(cardNumber);
+            return ResponseEntity.ok().body(
+                    new BinlistResponse.BinlistResponseWithCost(binlistResponse.getCountry().getAlpha2(), cost)
+            );
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Número de tarjeta inválido.");
+        }
     }
 }
