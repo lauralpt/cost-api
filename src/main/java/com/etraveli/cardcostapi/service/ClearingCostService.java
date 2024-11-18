@@ -45,13 +45,12 @@ public class ClearingCostService implements IClearingCostService {
     /**
      * Deletes a cost from the database by its ID.
      * @param id The ID of the cost to be deleted.
-     * @throws ResourceNotFoundException
      */
     public void deleteClearingCost(Long id) {
-        ClearingCost clearingCost = clearingCostRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Clearing cost not found for ID: " + id));
+        clearingCostRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Clearing cost not found for ID: " + id));
         clearingCostRepository.deleteById(id);
     }
+
     /**
      * Retrieves all costs from the database.
      * @return A list of all 'ClearingCost' entries.

@@ -107,6 +107,7 @@ public class ClearingCostController {
     public ResponseEntity<Void> deleteClearingCost(
             @Parameter(description = "The ID of the clearing cost to be deleted", example = "1", required = true)
             @PathVariable Long id) {
+        clearingCostService.deleteClearingCost(id);
         return ResponseEntity.noContent().build();
     }
 

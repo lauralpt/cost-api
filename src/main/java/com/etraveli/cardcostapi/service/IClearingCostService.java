@@ -9,7 +9,7 @@ import java.util.List;
 public interface IClearingCostService {
     ClearingCost saveClearingCost(ClearingCost clearingCost);
     ClearingCost updateClearingCost(Long id, ClearingCost clearingCost);
-    public void deleteClearingCost(Long id);
+    void deleteClearingCost(Long id);
     boolean isPanValid(String pan);
     List<ClearingCost> findAll();
     ClearingCost findByCountryCode(String countryCode);
