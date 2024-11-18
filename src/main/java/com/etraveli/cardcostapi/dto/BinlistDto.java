@@ -6,7 +6,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Data
-public class BinlistResponse {
+public class BinlistDto {
     private Country country;
 
     @Data

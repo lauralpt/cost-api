@@ -1,6 +1,6 @@
 package com.etraveli.cardcostapi;
 
-import com.etraveli.cardcostapi.dto.BinlistResponse;
+import com.etraveli.cardcostapi.dto.BinlistDto;
 import com.etraveli.cardcostapi.service.BinlistService;
 import com.etraveli.cardcostapi.entity.ClearingCost;
 import com.etraveli.cardcostapi.repository.ClearingCostRepository;
@@ -91,12 +91,12 @@ public class ClearingCostServiceTest {
     @Test
     public void testCalculateClearingCost() {
         // Set up the mock BinlistResponse
-        BinlistResponse.Country country = new BinlistResponse.Country();
+        BinlistDto.Country country = new BinlistDto.Country();
         country.setAlpha2("US");
-        BinlistResponse binlistResponse = new BinlistResponse();
-        binlistResponse.setCountry(country);
+        BinlistDto binlistDto = new BinlistDto();
+        binlistDto.setCountry(country);
 
-        when(binlistService.getCountryCodeByCardNumber("45717360")).thenReturn(binlistResponse);
+        when(binlistService.getCountryCodeByCardNumber("45717360")).thenReturn(binlistDto);
 
         // Set up the repository response for cost calculation
         ClearingCost clearingCost = new ClearingCost(1L, "US", new BigDecimal("5.00"));

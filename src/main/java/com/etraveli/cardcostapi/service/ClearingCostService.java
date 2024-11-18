@@ -1,6 +1,6 @@
 package com.etraveli.cardcostapi.service;
 
-import com.etraveli.cardcostapi.dto.BinlistResponse;
+import com.etraveli.cardcostapi.dto.BinlistDto;
 import com.etraveli.cardcostapi.entity.ClearingCost;
 import com.etraveli.cardcostapi.exception.ResourceNotFoundException;
 import com.etraveli.cardcostapi.repository.ClearingCostRepository;
@@ -45,12 +45,13 @@ public class ClearingCostService implements IClearingCostService {
     /**
      * Deletes a cost from the database by its ID.
      * @param id The ID of the cost to be deleted.
+     * @throws ResourceNotFoundException
      */
-    @Override
     public void deleteClearingCost(Long id) {
+        ClearingCost clearingCost = clearingCostRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Clearing cost not found for ID: " + id));
         clearingCostRepository.deleteById(id);
     }
-
     /**
      * Retrieves all costs from the database.
      * @return A list of all 'ClearingCost' entries.
@@ -98,7 +99,7 @@ public class ClearingCostService implements IClearingCostService {
      */
 
     @Override
-    public BinlistResponse getCountryCodeFromCardNumber(String cardNumber) {
+    public BinlistDto getCountryCodeFromCardNumber(String cardNumber) {
         return binlistService.getCountryCodeByCardNumber(cardNumber);
     }
 

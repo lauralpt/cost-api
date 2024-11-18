@@ -1,6 +1,6 @@
 package com.etraveli.cardcostapi.service;
 
-import com.etraveli.cardcostapi.dto.BinlistResponse;
+import com.etraveli.cardcostapi.dto.BinlistDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -10,9 +10,9 @@ public class BinlistService {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public BinlistResponse getCountryCodeByCardNumber(String cardNumber) {
+    public BinlistDto getCountryCodeByCardNumber(String cardNumber) {
         String url = "https://lookup.binlist.net/" + cardNumber;
-        ResponseEntity<BinlistResponse> response = restTemplate.getForEntity(url, BinlistResponse.class);
+        ResponseEntity<BinlistDto> response = restTemplate.getForEntity(url, BinlistDto.class);
         return response.getBody();
     }
 }

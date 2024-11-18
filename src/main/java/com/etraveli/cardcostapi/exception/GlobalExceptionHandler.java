@@ -13,24 +13,22 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-    /**
-     * Clase que maneja las excepciones globales.
-     * Esta clase utiliza {@code @ControllerAdvice} para capturar y manejar excepciones específicas
-     * de forma centralizada, permitiendo una mayor consistencia y simplicidad.
-     * Extiende {@link ResponseEntityExceptionHandler} para proporcionar manejo detallado
-     * de excepciones relacionadas con argumentos de métodos no válidos.
-     */
-
+/**
+ * Class that handles global exceptions.
+ * This class uses {@code @ControllerAdvice} to capture and manage specific exceptions
+ * in a centralized way, ensuring greater consistency and simplicity.
+ * Extends {@link ResponseEntityExceptionHandler} to provide detailed handling
+ * of exceptions related to invalid method arguments.
+ */
 @ControllerAdvice
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
-        /**
-         * Esta excepción se lanza cuando el recurso solicitado no existe en la base de datos.
-         * Captura la excepción y devuelve una respuesta estructurada con el estado HTTP 404.
-         *
-         * @param ex      La excepción que ha sido lanzada.
-         * @param request Detalles de la solicitud actual.
-         * @return Una respuesta HTTP con el código de estado {@code 404 NOT FOUND} y un cuerpo con detalles del error.
-         */
+    /**
+     * This exception is thrown when the requested resource does not exist in the database.
+     * Captures the exception and returns a structured response with HTTP status 404.
+     * @param ex The exception that was thrown.
+     * @param request Details of the current request.
+     * @return An HTTP response with status code {@code 404 NOT FOUND} and a body with error details.
+     */
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException ex, WebRequest request) {
         Map<String, Object> body = new HashMap<>();
@@ -44,16 +42,14 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Maneja excepciones relacionadas con argumentos de métodos no válidos, por ejemplo,
-     * errores en la validación de {@code @RequestBody} utilizando {@code @Valid}.
-     *
-     * @param ex La excepción que ha sido lanzada debido a la falla en la validación.
-     * @param headers Encabezados HTTP de la solicitud.
-     * @param status Estado HTTP asociado al error.
-     * @param request Detalles de la solicitud actual.
-     * @return Una respuesta HTTP con detalles de los errores de validación y el estado correspondiente.
+     * Handles exceptions related to invalid method arguments, for example,
+     * validation errors in {@code @RequestBody} using {@code @Valid}.
+     * @param ex The exception that was thrown due to validation failure.
+     * @param headers HTTP headers of the request.
+     * @param status  HTTP status associated with the error.
+     * @param request Details of the current request.
+     * @return An HTTP response with validation error details and the corresponding status.
      */
-
     protected ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
                                                                   HttpHeaders headers,
                                                                   HttpStatus status,
@@ -63,7 +59,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         body.put("status", status.value());
         body.put("error", "Validation Error");
 
-        // Mapea los errores de validación y agrega al cuerpo de la respuesta
+        // Map validation errors and add them to the response body
         Map<String, String> errors = new HashMap<>();
         ex.getBindingResult().getFieldErrors().forEach(error ->
                 errors.put(error.getField(), error.getDefaultMessage()));
@@ -73,11 +69,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     /**
-     * Maneja excepciones generales que no están específicamente controladas en otros manejadores.
-     *
-     * @param ex      La excepción lanzada.
-     * @param request Detalles de la solicitud actual.
-     * @return Una respuesta HTTP con el código de estado {@code 500 INTERNAL SERVER ERROR} y detalles del error.
+     * Handles general exceptions that are not specifically controlled by other handlers.
+     * @param ex The exception that was thrown.
+     * @param request Details of the current request.
+     * @return An HTTP response with status code {@code 500 INTERNAL SERVER ERROR} and error details.
      */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGeneralException(Exception ex, WebRequest request) {
