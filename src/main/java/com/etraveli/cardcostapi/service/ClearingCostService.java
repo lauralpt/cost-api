@@ -18,10 +18,9 @@ public class ClearingCostService implements IClearingCostService {
     private final BinlistService binlistService;
 
     /**
-     * Guarda un nuevo costo de clearing en la base de datos.
-     *
-     * @param clearingCost Costo a guardar.
-     * @return 'ClearingCost' guardado.
+     * Saves a new clearing cost to the database.
+     * @param clearingCost The cost to be saved.
+     * @return The saved 'ClearingCost'.
      */
     @Override
     public ClearingCost saveClearingCost(ClearingCost clearingCost) {
@@ -29,11 +28,10 @@ public class ClearingCostService implements IClearingCostService {
     }
 
     /**
-     * Actualiza un costo existente en la base de datos.
-     *
-     * @param id El ID del costo a actualizar.
-     * @param clearingCost Datos actualizados del costo.
-     * @return 'ClearingCost' actualizado.
+     * Updates an existing cost in the database.
+     * @param id The ID of the cost to update.
+     * @param clearingCost The updated cost data.
+     * @return The updated 'ClearingCost'.
      */
     @Override
     public ClearingCost updateClearingCost(Long id, ClearingCost clearingCost) {
@@ -45,8 +43,8 @@ public class ClearingCostService implements IClearingCostService {
     }
 
     /**
-     * Elimina un costo de la base de datos por su ID.
-     * @param id ID del costo a eliminar.
+     * Deletes a cost from the database by its ID.
+     * @param id The ID of the cost to be deleted.
      */
     @Override
     public void deleteClearingCost(Long id) {
@@ -54,8 +52,8 @@ public class ClearingCostService implements IClearingCostService {
     }
 
     /**
-     * Obtiene todos los costos de la base de datos.
-     * @return Una lista de todos los 'ClearingCost'.
+     * Retrieves all costs from the database.
+     * @return A list of all 'ClearingCost' entries.
      */
     @Override
     public List<ClearingCost> findAll() {
@@ -63,12 +61,12 @@ public class ClearingCostService implements IClearingCostService {
     }
 
     /**
-     * Busca un costo por código de país.
-     *
-     * @param countryCode Código de país a buscar.
-     * @return 'ClearingCost' correspondiente al país.
-     * @throws ResourceNotFoundException Si no se encuentra un costo para el país especificado.
+     * Searches a cost by country code.
+     * @param countryCode The country code to lookup.
+     * @return 'ClearingCost' corresponding to the country.
+     * @throws ResourceNotFoundException If no cost is found for the specified country.
      */
+
     @Override
     public ClearingCost findByCountryCode(String countryCode) {
         return clearingCostRepository.findByCountryCode(countryCode)
@@ -76,13 +74,13 @@ public class ClearingCostService implements IClearingCostService {
     }
 
     /**
-     * Calcula el costo de clearing basado en el BIN (primeros dígitos de la tarjeta).
-     * @param cardNumber El número de la tarjeta para determinar el país emisor.
-     * @return El costo calculado.
+     * Calculates the clearing cost based on the BIN (first digits of the card).
+     * @param cardNumber The card number to determine the issuing country.
+     * @return The calculated cost.
      */
     @Override
     public BigDecimal calculateClearingCost(String cardNumber) {
-        // Validar el PAN antes de proceder
+        // Validate the PAN before proceeding
         if (!isPanValid(cardNumber)) {
             throw new IllegalArgumentException("Número de tarjeta inválido");
         }
@@ -94,21 +92,22 @@ public class ClearingCostService implements IClearingCostService {
     }
 
     /**
-     * Obtiene el código del país emisor de la tarjeta usando Binlist.
-     *
-     * @param cardNumber El número de tarjeta.
-     * @return El código del país de emisión.
+     * Retrieves the country code of the card using Binlist.
+     * @param cardNumber The card number.
+     * @return The issuing country code.
      */
+
     @Override
     public BinlistResponse getCountryCodeFromCardNumber(String cardNumber) {
         return binlistService.getCountryCodeByCardNumber(cardNumber);
     }
 
     /**
-     * Proporciona un costo predeterminado para los países no especificados (OTHERS).
-     * @param countryCode Código del país para el cual se requiere determinar el costo.
-     * @return 'ClearingCost' con el costo predeterminado.
+     * Provides a default cost for unspecified countries (OTHERS).
+     * @param countryCode The country code for which the cost needs to be determined.
+     * @return 'ClearingCost' with the default cost.
      */
+
     private ClearingCost getDefaultClearingCost(String countryCode) {
         ClearingCost defaultCost = new ClearingCost();
         defaultCost.setCountryCode(countryCode);

@@ -19,43 +19,44 @@ public class ClearingCostController {
 
     private final IClearingCostService clearingCostService;
 
-    @PostMapping
+    @PostMapping("create-clearing-cost")
     public ResponseEntity<ClearingCost> createClearingCost(@Valid @RequestBody ClearingCost clearingCost) {
         return new ResponseEntity<>(clearingCostService.saveClearingCost(clearingCost), HttpStatus.CREATED);
     }
 
-    @GetMapping
+    @GetMapping("get-all-clearing-costs")
     public ResponseEntity<List<ClearingCost>> getAllClearingCosts() {
         return ResponseEntity.ok(clearingCostService.findAll());
     }
 
-    @GetMapping("/{countryCode}")
+    @GetMapping("get-clearing-cost-by-country/{countryCode}")
     public ResponseEntity<ClearingCost> getClearingCostByCountry(@PathVariable String countryCode) {
         return ResponseEntity.ok(clearingCostService.findByCountryCode(countryCode));
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("update-clearing-cost-by-country/{id}")
     public ResponseEntity<ClearingCost> updateClearingCost(@PathVariable Long id, @Valid @RequestBody ClearingCost clearingCost) {
         return ResponseEntity.ok(clearingCostService.updateClearingCost(id, clearingCost));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("delete-clearing-cost-by-country/{id}")
     public ResponseEntity<Void> deleteClearingCost(@PathVariable Long id) {
         clearingCostService.deleteClearingCost(id);
         return ResponseEntity.noContent().build();
     }
 
     /**
-     * Endpoint para calcular el costo basado en el número de tarjeta (PAN).
-     * @param cardNumber El número de la tarjeta.
-     * @return Una respuesta con el costo  calculado o un error 400 si el PAN no es válido.
+     * Endpoint to calculate the cost based on the card number (PAN).
+     * @param cardNumber The card number.
+     * @return A response with the calculated cost or a 400 error if the PAN is not valid.
      */
+
     @GetMapping("/payment-cards-cost")
     public ResponseEntity<Object> calculateClearingCost(@RequestParam String cardNumber) {
         try {
-            // Validar el PAN antes de proceder
+            // Validate the PAN before proceeding
             if (!clearingCostService.isPanValid(cardNumber)) {
-                return ResponseEntity.badRequest().body("Número de tarjeta inválido. Verifique el formato y longitud.");
+                return ResponseEntity.badRequest().body("Invalid card number. Please check the format and length.");
             }
             BinlistResponse binlistResponse = clearingCostService.getCountryCodeFromCardNumber(cardNumber);
             BigDecimal cost = clearingCostService.calculateClearingCost(cardNumber);
@@ -63,7 +64,7 @@ public class ClearingCostController {
                     new BinlistResponse.BinlistResponseWithCost(binlistResponse.getCountry().getAlpha2(), cost)
             );
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Número de tarjeta inválido.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid card number.");
         }
     }
 }
