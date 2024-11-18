@@ -13,6 +13,8 @@ import org.springframework.http.ResponseEntity;
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -49,7 +51,7 @@ public class ClearingCostControllerTest {
 
         ResponseEntity<List<ClearingCost>> response = clearingCostController.getAllClearingCosts();
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(2, response.getBody().size());
+        assertEquals(2, Objects.requireNonNull(response.getBody()).size());
     }
 
     @Test
