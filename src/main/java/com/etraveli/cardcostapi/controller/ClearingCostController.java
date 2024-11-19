@@ -1,6 +1,6 @@
 package com.etraveli.cardcostapi.controller;
 
-import com.etraveli.cardcostapi.dto.BinlistResponse;
+import com.etraveli.cardcostapi.dto.BinlistDto;
 import com.etraveli.cardcostapi.entity.ClearingCost;
 import com.etraveli.cardcostapi.service.IClearingCostService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,7 +11,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +29,8 @@ import java.util.List;
 public class ClearingCostController {
 
     private final IClearingCostService clearingCostService;
+    private static final Logger logger = LoggerFactory.getLogger(ClearingCostController.class);
+
 
     @PostMapping("create-clearing-cost")
     @Operation(summary = "Create a new clearing cost",
@@ -41,6 +46,7 @@ public class ClearingCostController {
             @Valid @RequestBody ClearingCost clearingCost) {
         return new ResponseEntity<>(clearingCostService.saveClearingCost(clearingCost), HttpStatus.CREATED);
     }
+
 
     @GetMapping("get-all-clearing-costs")
     @Operation(summary = "Retrieve all clearing costs",
@@ -67,6 +73,7 @@ public class ClearingCostController {
             @PathVariable String countryCode) {
         return ResponseEntity.ok(clearingCostService.findByCountryCode(countryCode));
     }
+
 
     @PutMapping("update-clearing-cost-by-country/{id}")
     @Operation(summary = "Update a clearing cost by ID",
@@ -107,7 +114,6 @@ public class ClearingCostController {
      * @param cardNumber The card number.
      * @return A response with the calculated cost or a 400 error if the PAN is not valid.
      */
-
     @GetMapping("/payment-cards-cost")
     @Operation(summary = "Calculate the clearing cost of a payment card",
             description = "Returns the clearing cost based on the country of the card. Uses Binlist to obtain " +
@@ -115,25 +121,54 @@ public class ClearingCostController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Clearing cost calculated successfully",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = BinlistResponse.BinlistResponseWithCost.class))),
+                            schema = @Schema(implementation = BinlistDto.BinlistResponseWithCost.class))),
             @ApiResponse(responseCode = "400", description = "Invalid card number or error obtaining information",
+                    content = @Content(mediaType = "application/json")),
+            @ApiResponse(responseCode = "429", description = "Too many requests",
                     content = @Content(mediaType = "application/json"))
     })
-    public ResponseEntity<Object> calculateClearingCost(@Parameter(description = "The payment card number (PAN). " +
-            "It should have between 8 and 19 digits.",
-            example = "45717360", required = true)@RequestParam String cardNumber){
+    public ResponseEntity<Object> calculateClearingCost(
+            @Parameter(description = "The payment card number (PAN). It should have between 8 and 19 digits.",
+                    example = "45717360", required = true)
+            @RequestParam @Pattern(regexp = "^[0-9]{8,19}$", message = "Card number must be between 8 and 19 digits.") String cardNumber) {
+
         try {
-            // Validate the PAN before proceeding
             if (!clearingCostService.isPanValid(cardNumber)) {
                 return ResponseEntity.badRequest().body("Invalid card number. Please check the format and length.");
             }
-            BinlistResponse binlistResponse = clearingCostService.getCountryCodeFromCardNumber(cardNumber);
+
+            BinlistDto binlistResponse = clearingCostService.getCountryCodeFromCardNumber(cardNumber);
             BigDecimal cost = clearingCostService.calculateClearingCost(cardNumber);
+
+            String maskedCardNumber = maskCardNumber(cardNumber);
+            logger.info("Clearing cost calculated for card ending with: {}", maskedCardNumber);
+
             return ResponseEntity.ok().body(
-                    new BinlistResponse.BinlistResponseWithCost(binlistResponse.getCountry().getAlpha2(), cost)
+                    new BinlistDto.BinlistResponseWithCost(binlistResponse.getCountry().getAlpha2(), cost)
             );
         } catch (IllegalArgumentException e) {
+            logger.error("Invalid card number: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Invalid card number.");
+        } catch (Exception e) {
+            logger.error("Error calculating clearing cost: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while processing the request.");
         }
+    }
+
+    /**
+     * Masks a credit card number by replacing all but the last four digits with asterisks.
+     * For card numbers with 4 or fewer characters, the original card number is returned as-is.
+     * For longer card numbers, the result will be formatted as "**** **** **** XXXX",
+     * where "XXXX" represents the last four digits of the input.
+     *
+     * @param cardNumber the credit card number to be masked. Must not be null.
+     * @return the masked card number, with only the last four digits visible.
+     * @throws NullPointerException if {@code cardNumber} is null.
+     */
+    private String maskCardNumber(String cardNumber) {
+        if (cardNumber.length() <= 4) {
+            return cardNumber;
+        }
+        return "**** **** **** " + cardNumber.substring(cardNumber.length() - 4);
     }
 }

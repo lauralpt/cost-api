@@ -1,6 +1,6 @@
 package com.etraveli.cardcostapi.service;
 
-import com.etraveli.cardcostapi.dto.BinlistResponse;
+import com.etraveli.cardcostapi.dto.BinlistDto;
 import com.etraveli.cardcostapi.entity.ClearingCost;
 import com.etraveli.cardcostapi.exception.ResourceNotFoundException;
 import com.etraveli.cardcostapi.repository.ClearingCostRepository;
@@ -66,7 +66,6 @@ public class ClearingCostService implements IClearingCostService {
      * @return 'ClearingCost' corresponding to the country.
      * @throws ResourceNotFoundException If no cost is found for the specified country.
      */
-
     @Override
     public ClearingCost findByCountryCode(String countryCode) {
         return clearingCostRepository.findByCountryCode(countryCode)
@@ -96,9 +95,8 @@ public class ClearingCostService implements IClearingCostService {
      * @param cardNumber The card number.
      * @return The issuing country code.
      */
-
     @Override
-    public BinlistResponse getCountryCodeFromCardNumber(String cardNumber) {
+    public BinlistDto getCountryCodeFromCardNumber(String cardNumber) {
         return binlistService.getCountryCodeByCardNumber(cardNumber);
     }
 
@@ -107,7 +105,6 @@ public class ClearingCostService implements IClearingCostService {
      * @param countryCode The country code for which the cost needs to be determined.
      * @return 'ClearingCost' with the default cost.
      */
-
     private ClearingCost getDefaultClearingCost(String countryCode) {
         ClearingCost defaultCost = new ClearingCost();
         defaultCost.setCountryCode(countryCode);
@@ -116,9 +113,9 @@ public class ClearingCostService implements IClearingCostService {
     }
 
     /**
-     * Valida si el PAN cumple con el formato correcto y pasa la validación de Luhn.
-     * @param pan El número de tarjeta (PAN).
-     * @return Verdadero si el PAN es válido, falso de lo contrario.
+     * Validates if the PAN (Primary Account Number) has the correct format and passes the Luhn validation.
+     * @param pan The card number (PAN).
+     * @return True if the PAN is valid, false otherwise.
      */
     @Override
     public boolean isPanValid(String pan) {
@@ -126,9 +123,9 @@ public class ClearingCostService implements IClearingCostService {
     }
 
     /**
-     * Valida el formato del PAN (solo dígitos y longitud entre 8 y 19).
-     * @param pan El número de tarjeta.
-     * @return Verdadero si el formato es válido, falso de lo contrario.
+     * Validates the format of the PAN (only digits and length between 8 and 19).
+     * @param pan The card number.
+     * @return True if the format is valid, false otherwise.
      */
     public boolean isValidPanFormat(String pan) {
         if (pan == null || pan.length() < 8 || pan.length() > 19) {
@@ -138,22 +135,20 @@ public class ClearingCostService implements IClearingCostService {
     }
 
     /**
-     * Algoritmo de Luhn para validar el PAN.
-     * @param pan El número de tarjeta.
-     * @return Verdadero si el PAN es válido según Luhn, falso de lo contrario.
+     * Luhn algorithm to validate the PAN.
+     * @param pan The card number.
+     * @return True if the PAN is valid according to Luhn, false otherwise.
      */
     public boolean isValidLuhn(String pan) {
         int nDigits = pan.length();
         int sum = 0;
         boolean isSecond = false;
 
-        // Iterar de derecha a izquierda
         for (int i = nDigits - 1; i >= 0; i--) {
             int d = pan.charAt(i) - '0';
             if (isSecond) {
                 d = d * 2;
             }
-            // Si el resultado de la multiplicación es mayor a 9, restamos 9
             sum += d > 9 ? d - 9 : d;
             isSecond = !isSecond;
         }

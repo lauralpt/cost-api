@@ -20,6 +20,18 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
+/**
+ * Unit tests for {@link ClearingCostController}.
+ * This class uses JUnit and Mockito to test the functionality of {@link ClearingCostController}.
+ * The {@link IClearingCostService} is mocked to verify the interactions and ensure that the controller
+ * methods behave as expected. Each test method focuses on a specific endpoint of the controller.
+ *
+ * @see org.mockito.Mock
+ * @see org.mockito.InjectMocks
+ * @see org.mockito.MockitoAnnotations
+ * @see org.junit.jupiter.api.Test
+ */
+
 public class ClearingCostControllerTest {
 
     @Mock
@@ -33,6 +45,12 @@ public class ClearingCostControllerTest {
         MockitoAnnotations.openMocks(this);
     }
 
+    /**
+     * Tests the creation of a clearing cost.
+     * Verifies that the {@code createClearingCost} method returns an HTTP status of {@code CREATED}
+     * and that the response body contains the expected {@link ClearingCost}.
+     */
+
     @Test
     public void testCreateClearingCost() {
         ClearingCost clearingCost = new ClearingCost(1L, "US", new BigDecimal("5.00"));
@@ -42,6 +60,12 @@ public class ClearingCostControllerTest {
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(clearingCost, response.getBody());
     }
+
+    /**
+     * Tests retrieving all clearing costs.
+     * Verifies that the {@code getAllClearingCosts} method returns an HTTP status of {@code 200 OK}
+     * and that the response body contains the correct number of clearing cost records.
+     */
 
     @Test
     public void testGetAllClearingCosts() {
@@ -54,15 +78,27 @@ public class ClearingCostControllerTest {
         assertEquals(2, Objects.requireNonNull(response.getBody()).size());
     }
 
+    /**
+     * Tests retrieving a clearing cost by country code.
+     * Verifies that the {@code getClearingCostByCountry} method returns an HTTP status of {@code 200 OK}
+     * and that the response body contains the expected {@link ClearingCost}.
+     */
+
     @Test
     public void testGetClearingCostByCountry() {
         ClearingCost clearingCost = new ClearingCost(1L, "US", new BigDecimal("5.00"));
         when(clearingCostService.findByCountryCode("US")).thenReturn(clearingCost);
 
-        ResponseEntity<ClearingCost> response = clearingCostController.getClearingCostByCountry("US");
+        ResponseEntity<ClearingCost> response = clearingCostController.getClearingCostByCountry(clearingCost.getCountryCode());
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(clearingCost, response.getBody());
     }
+
+    /**
+     * Tests updating an existing clearing cost.
+     * Verifies that the {@code updateClearingCost} method returns an HTTP status of {@code 200 OK}
+     * and that the response body contains the updated {@link ClearingCost}.
+     */
 
     @Test
     public void testUpdateClearingCost() {
@@ -73,6 +109,11 @@ public class ClearingCostControllerTest {
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(updatedClearingCost, response.getBody());
     }
+
+    /**
+     * Tests deleting an existing clearing cost.
+     * Verifies that the {@code deleteClearingCost} method returns an HTTP status of {@code 204 NO CONTENT}.
+     */
 
     @Test
     public void testDeleteClearingCost() {
