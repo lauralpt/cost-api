@@ -81,7 +81,7 @@ public class ClearingCostService implements IClearingCostService {
     public BigDecimal calculateClearingCost(String cardNumber) {
         // Validate the PAN before proceeding
         if (!isPanValid(cardNumber)) {
-            throw new IllegalArgumentException("Número de tarjeta inválido");
+            throw new IllegalArgumentException("Invalid number");
         }
 
         String countryCode = getCountryCodeFromCardNumber(cardNumber).getCountry().getAlpha2();
